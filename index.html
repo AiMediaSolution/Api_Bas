@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Data to API</title>
+</head>
+
+<body>
+    <h1>Gửi dữ liệu lên API</h1>
+    <form id="sendForm">
+        <label for="content">Nội dung:</label><br>
+        <textarea id="content" name="content" rows="4" cols="50"
+            placeholder="Nhập nội dung tại đây..."></textarea><br><br>
+        <button type="submit">Gửi</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('sendForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Ngăn gửi form mặc định
+
+            // Lấy nội dung người dùng nhập
+            const content = document.getElementById('content').value;
+
+            // Tạo dữ liệu JSON
+            const data = {
+                Status: 'progress',
+                Content: content
+            };
+
+            try {
+                // Gửi dữ liệu lên API
+                const response = await fetch('http://localhost:3000/data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                // Xử lý phản hồi từ API
+                const result = await response.json();
+                document.getElementById('result').innerHTML = `
+                    <h3>Kết quả:</h3>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Lỗi:', error);
+                document.getElementById('result').innerHTML = `<p style="color: red;">Đã xảy ra lỗi khi gửi dữ liệu!</p>`;
+            }
+        });
+    </script>
+</body>
+
+</html>
