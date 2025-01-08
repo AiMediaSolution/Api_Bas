@@ -43,6 +43,7 @@ app.get("/data", (req, res) => {
 
 // Endpoint POST /data
 app.post("/data", (req, res) => {
+  Console.log("Received body:", req.body);
   const { Status, Content } = req.body;
 
   if (!Status && !Content) {
