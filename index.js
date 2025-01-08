@@ -3,23 +3,29 @@ const cors = require("cors");
 const { WebSocketServer } = require("ws");
 
 const app = express();
-app.use(cors());
+
+// Middleware xử lý CORS
+app.use(
+  cors({
+    origin: "*", // Điều chỉnh cụ thể origin nếu cần
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Middleware xử lý JSON và URL-encoded
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// WebSocket Server
+const server = require("http").createServer(app);
+const wss = new WebSocketServer({ server });
 
 let status = "noData";
 let content = null;
 
-// Tạo server HTTP để sử dụng WebSocket
-const server = require("http").createServer(app);
-
-// Tạo WebSocket server
-const wss = new WebSocketServer({ server });
-
-// Khi một client kết nối
 wss.on("connection", (ws) => {
   console.log("WebSocket client connected");
-
-  // Gửi trạng thái ban đầu cho client
   ws.send(JSON.stringify({ status, content }));
 
   ws.on("close", () => {
@@ -27,7 +33,6 @@ wss.on("connection", (ws) => {
   });
 });
 
-// Gửi dữ liệu cho tất cả client WebSocket
 const broadcastData = (data) => {
   wss.clients.forEach((client) => {
     if (client.readyState === client.OPEN) {
@@ -43,10 +48,11 @@ app.get("/data", (req, res) => {
 
 // Endpoint POST /data
 app.post("/data", (req, res) => {
-  //   Console.log("Received body:", req.body);
+  console.log("Headers:", req.headers);
+  console.log("Body:", req.body);
+
   const { Status, Content } = req.body;
-  console.log(Status);
-  console.log(Content);
+
   if (!Status && !Content) {
     return res.status(400).json({
       message:
@@ -55,14 +61,13 @@ app.post("/data", (req, res) => {
   }
 
   if (Status) {
-    status = Status; // Cập nhật trạng thái
+    status = Status;
   }
 
   if (Content) {
-    content = Content; // Cập nhật nội dung
+    content = Content;
   }
 
-  // Phát dữ liệu mới cho tất cả client WebSocket
   broadcastData({ status, content });
 
   res.status(200).json({
@@ -72,6 +77,6 @@ app.post("/data", (req, res) => {
   });
 });
 
-// Start server
-const PORT = 3000;
+// Start Server
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
