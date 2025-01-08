@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Data to API</title>
+    <title>API for Bas</title>
+    <link rel="icon" href="LogoAms.png" type="image/png">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -13,45 +15,73 @@
         <label for="content">Nội dung:</label><br>
         <textarea id="content" name="content" rows="4" cols="50"
             placeholder="Nhập nội dung tại đây..."></textarea><br><br>
-        <button type="submit">Gửi</button>
+        <div class="button-container">
+            <button type="submit">Gửi</button>
+        </div>
+
     </form>
-
-    <div id="result"></div>
-
+    <h2>Trạng thái hiện tại</h2>
+    <div id="result">Chưa có dữ liệu.</div>
     <script>
-        document.getElementById('sendForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Ngăn gửi form mặc định
+        const apiUrl = "http://localhost:3000/data"; // API endpoint
+        const wsUrl = "ws://localhost:3000"; // WebSocket server URL
 
-            // Lấy nội dung người dùng nhập
-            const content = document.getElementById('content').value;
-
-            // Tạo dữ liệu JSON
-            const data = {
-                Status: 'progress',
-                Content: content
-            };
-
+        async function sendData(content) {
             try {
-                // Gửi dữ liệu lên API
-                const response = await fetch('https://api-bas.onrender.com/data', {
-                    method: 'POST',
+                const response = await fetch(apiUrl, {
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(data),
+                    body: JSON.stringify({ Content: content }),
                 });
 
-                // Xử lý phản hồi từ API
-                const result = await response.json();
-                document.getElementById('result').innerHTML = `
-                    <h3>Kết quả:</h3>
-                    <pre>${JSON.stringify(result, null, 2)}</pre>
-                `;
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("Dữ liệu đã được gửi:", data);
+                } else {
+                    console.error("Lỗi khi gửi dữ liệu:", response.statusText);
+                }
             } catch (error) {
-                console.error('Lỗi:', error);
-                document.getElementById('result').innerHTML = `<p style="color: red;">Đã xảy ra lỗi khi gửi dữ liệu!</p>`;
+                console.error("Lỗi khi gửi yêu cầu:", error);
+            }
+        }
+
+        function setupWebSocket() {
+            const ws = new WebSocket(wsUrl);
+            const resultDiv = document.getElementById("result");
+
+            ws.onopen = () => {
+                console.log("Đã kết nối tới WebSocket server");
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                resultDiv.innerHTML = `Trạng thái: ${data.status || "N/A"}<br>Nội dung: ${data.content || "N/A"}`;
+
+                console.log("Trạng thái mới nhận được:", data);
+            };
+
+            ws.onclose = () => {
+                console.log("Kết nối WebSocket đã đóng");
+            };
+
+            ws.onerror = (error) => {
+                console.error("Lỗi WebSocket:", error);
+            };
+        }
+
+        document.getElementById("sendForm").addEventListener("submit", (event) => {
+            event.preventDefault();
+            const content = document.getElementById("content").value;
+            if (content.trim()) {
+                sendData(content);
+            } else {
+                alert("Vui lòng nhập nội dung.");
             }
         });
+
+        setupWebSocket();
     </script>
 </body>
 
