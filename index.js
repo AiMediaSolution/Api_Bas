@@ -43,9 +43,10 @@ app.get("/data", (req, res) => {
 
 // Endpoint POST /data
 app.post("/data", (req, res) => {
-  Console.log("Received body:", req.body);
+  //   Console.log("Received body:", req.body);
   const { Status, Content } = req.body;
-
+  console.log(Status);
+  console.log(Content);
   if (!Status && !Content) {
     return res.status(400).json({
       message:
