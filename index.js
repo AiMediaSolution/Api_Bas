@@ -8,6 +8,7 @@ app.use(express.json());
 
 let status = "noData";
 let content = null;
+let message = "Chưa thực thi";
 
 // Tạo server HTTP để sử dụng WebSocket
 const server = require("http").createServer(app);
@@ -20,7 +21,7 @@ wss.on("connection", (ws) => {
   console.log("WebSocket client connected");
 
   // Gửi trạng thái ban đầu cho client
-  ws.send(JSON.stringify({ status, content }));
+  ws.send(JSON.stringify({ status, content, message }));
 
   ws.on("close", () => {
     console.log("WebSocket client disconnected");
@@ -69,6 +70,9 @@ app.post("/data", (req, res) => {
       break;
     case "doing":
       message = "Hệ thống đang xử lý yêu cầu. Vui lòng đợi.";
+      break;
+    case "progress":
+      message = "Đang gửi đến hệ thống Bas. Vui lòng đợi.";
       break;
     default:
       message = "Trạng thái không xác định.";
