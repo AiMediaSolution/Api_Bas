@@ -59,11 +59,27 @@ app.post("/data", (req, res) => {
     content = Content; // Cập nhật nội dung
   }
 
-  // Phát dữ liệu mới cho tất cả client WebSocket
-  broadcastData({ status, content });
+  let message;
+  switch (status) {
+    case "fail":
+      message = "Quá trình thất bại. Vui lòng kiểm tra lại.";
+      break;
+    case "success":
+      message = "Thành công! Dữ liệu đã được xử lý.";
+      break;
+    case "doing":
+      message = "Hệ thống đang xử lý yêu cầu. Vui lòng đợi.";
+      break;
+    default:
+      message = "Trạng thái không xác định.";
+  }
 
+  // Phát dữ liệu mới cho tất cả client WebSocket
+  broadcastData({ status, content, message });
+
+  // Trả về phản hồi
   res.status(200).json({
-    message: "Dữ liệu đã được cập nhật.",
+    message,
     status,
     content,
   });

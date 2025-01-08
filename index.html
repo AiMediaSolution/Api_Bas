@@ -57,7 +57,7 @@
 
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                resultDiv.innerHTML = `Trạng thái: ${data.status || "N/A"}<br>Nội dung: ${data.content || "N/A"}`;
+                resultDiv.innerHTML = `Trạng thái: ${data.status || "N/A"}<br>Nội dung: ${data.content || "N/A"} <br> Quá trình: ${data.message || "N/A"}  `;
 
                 console.log("Trạng thái mới nhận được:", data);
             };
