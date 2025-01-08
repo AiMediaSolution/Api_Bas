@@ -33,7 +33,7 @@
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ Content: content }),
+                    body: JSON.stringify({ Status: "progress", Content: content }),
                 });
 
                 if (response.ok) {
