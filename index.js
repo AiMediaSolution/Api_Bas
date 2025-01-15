@@ -10,17 +10,17 @@ let status = "noData";
 let content = null;
 let message = "Chưa thực thi";
 
-// Tạo server HTTP để sử dụng WebSocket
+// Create server HTTP to use WebSocket
 const server = require("http").createServer(app);
 
-// Tạo WebSocket server
+// Create WebSocket server
 const wss = new WebSocketServer({ server });
 
-// Khi một client kết nối
+// When client connect
 wss.on("connection", (ws) => {
   console.log("WebSocket client connected");
 
-  // Gửi trạng thái ban đầu cho client
+  // Send entry status to client
   ws.send(JSON.stringify({ status, content, message }));
 
   ws.on("close", () => {
@@ -28,7 +28,7 @@ wss.on("connection", (ws) => {
   });
 });
 
-// Gửi dữ liệu cho tất cả client WebSocket
+// Send data to all client WebSocket
 const broadcastData = (data) => {
   wss.clients.forEach((client) => {
     if (client.readyState === client.OPEN) {
@@ -53,11 +53,11 @@ app.post("/data", (req, res) => {
   }
 
   if (Status) {
-    status = Status; // Cập nhật trạng thái
+    status = Status;
   }
 
   if (Content) {
-    content = Content; // Cập nhật nội dung
+    content = Content;
   }
 
   let message;
@@ -78,10 +78,10 @@ app.post("/data", (req, res) => {
       message = "Trạng thái không xác định.";
   }
 
-  // Phát dữ liệu mới cho tất cả client WebSocket
+  // Emit new data to all WebSocket clients
   broadcastData({ status, content, message });
 
-  // Trả về phản hồi
+  // Return Response
   res.status(200).json({
     message,
     status,
